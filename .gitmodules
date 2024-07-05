@@ -1,0 +1,3 @@
+[submodule "NFLoc"]
+	path = NFLoc
+	url = https://github.com/bd-cse/NFLoc.git
