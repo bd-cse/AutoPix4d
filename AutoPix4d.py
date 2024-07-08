@@ -4,6 +4,7 @@ from NFLoc.folder_handling.parse_files_in_folder import _get_all_images_given_fo
 from automation_scripts.autopix import automate_pix4d, process_running_wmi
 from time import strftime
 import os
+import sys
 import logging
 
 # This is the script to automate stitching field images in Pix4dFields. It must
@@ -19,7 +20,7 @@ import logging
 # pop-up that prevented the auto-clicker from pressing the exit button.
 #
 # It will create a log with information about its execution and what it
-# accomplished.
+# accomplished found in the logs folder.
 
 # Gets all the image sets
 def get_sub_directory_paths(start_directory):
@@ -33,7 +34,7 @@ def process_all_images_in_set(folder_path : str) -> dict:
     for image in images:
         coords.append(_get_coordinates_as_point(image))
 
-    return _make_dict_with_coordinates_list("AutoPix4d\\Fields.geojson", coords)
+    return _make_dict_with_coordinates_list("Fields.geojson", coords)
 
 def interleave_field_and_num_of_images(fields_dict : dict) -> list:
     res = []
@@ -43,13 +44,16 @@ def interleave_field_and_num_of_images(fields_dict : dict) -> list:
 
 if __name__ == '__main__':
     timestamp = strftime("%Y-%m-%dT%H%M%S")
-    logging.basicConfig(filename=('AutoPix4d\\logs\\' + timestamp + '.log'), level=logging.INFO)
+    logging.basicConfig(filename=('logs\\' + timestamp + '.log'), level=logging.INFO)
     logger = logging.getLogger(__name__)
-    logger.info('Began process at ' + timestamp)
+    logger.info('Began process at ' + timestamp + '\n\n')
 
-    start_directory = "C:\\Users\\andre\\Desktop\\Project_Test\\ideal_img_set_folder"
-    tif_sets = get_sub_directory_paths(start_directory)
-    res = []
+    if (len(sys.argv) != 2):
+        logger.error("Invalid arguments given")
+        exit(-1)
+
+    # start_directory = "F:\\20230906_CemeteryHPNorth"
+    tif_sets = get_sub_directory_paths(sys.argv[1])
 
     for set in tif_sets:
         img_dict = process_all_images_in_set(set)
@@ -63,10 +67,7 @@ if __name__ == '__main__':
             logger.error(set + " in Pix4d did not close as expected.")
             break
 
-        res.append(set + " ... " + field_name)
-
-    for field in res.reverse():
-        logger.info("Made project: " + field)
+        logger.info("Made project: " + field_name + '\n\n')
 
     logger.info("Script terminated at " + strftime("%Y-%m-%dT%H%M%S"))
 
