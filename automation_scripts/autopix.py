@@ -55,7 +55,7 @@ def automate_pix4d(img_set_folder : str, field_name : str):
                                # tif files are auto selected.
 
     # *** CHANGE in real case scenario, ~3.0 * 60 for example ***      
-    time.sleep(1.0 * 60)
+    time.sleep(1.5 * 60)
 
     # clicks 'Apply'
     time.sleep(2.5)
@@ -72,7 +72,7 @@ def automate_pix4d(img_set_folder : str, field_name : str):
     pyautogui.click(1238, 688) # safety click for 'bands' issue
 
     # *** CHANGE in real case scenario, ~30.0 * 60 for example ***
-    time.sleep(3.0) # CHANGE to 30.0 * 60 in real case scenario
+    time.sleep(5.0 * 60) # CHANGE to 30.0 * 60 in real case scenario
 
     # clicks exit button
     # pyautogui.click(1891, 10)
