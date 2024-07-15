@@ -2,7 +2,7 @@ from remote_handling.retrieve_from_pad import transfer_images_from_remote
 from NFLoc.EXIF_handling.get_gps_data import _get_coordinates_as_point
 from NFLoc.geojson_handling.get_geojson_info import _make_dict_with_coordinates_list
 from NFLoc.folder_handling.parse_files_in_folder import _get_all_images_given_folder
-from automation_scripts.autopix import automate_pix4d, process_running_wmi
+from automation_scripts.autopix import automate_pix4d
 from time import strftime
 import os
 import sys
@@ -60,41 +60,40 @@ if __name__ == '__main__':
         print("Usage: python AutoPix4d.py [path to image sets] [optional: 'scp']")
         exit(-1)
 
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 3 and sys.argv[2] == 'scp':
         if transfer_images_from_remote(sys.argv[1]) == 1:
             logger.info('Successfully retrieved images from launchpad\n\n')
         else:
             logger.error('Did not retrieve images from launchpad')
             exit(-1)
 
+
     # start_directory = "F:\\20230906_CemeteryHPNorth"
-    tif_sets = get_sub_directory_paths(sys.argv[1])
-    processed_folder = os.path.join(sys.argv[1], "processed")
+    # tif_sets = get_sub_directory_paths(sys.argv[1])
+    tif_set = sys.argv[1]
+    processed_folder = os.path.join(sys.argv[1], "../autopix_processed")
 
-    for set in tif_sets:
-        if set == processed_folder:
-            continue
 
-        img_dict = process_all_images_in_set(set)
-        field_name = get_field_with_max_value(img_dict)
-        logger.info('Retrieved EXIF data in ' + set + ' ... ' + field_name)
+    img_dict = process_all_images_in_set(tif_set)
+    field_name = get_field_with_max_value(img_dict)
+    logger.info('Retrieved EXIF data in ' + tif_set + ' ... ' + field_name)
 
-        logger.info("Opening Pix4d to create project...")
-        automate_pix4d(set, field_name + "_" + date)
+    logger.info("Opening Pix4d to create project...")
+    automate_pix4d(tif_set, field_name + "_" + date)
 
-        # if process_running_wmi("Pix4dfields.exe"):
-        #    logger.error(set + " in Pix4d did not close as expected.")
-        #    break
+    # if process_running_wmi("Pix4dfields.exe"):
+    #    logger.error(set + " in Pix4d did not close as expected.")
+    #    break
 
-        logger.info("Made project: " + field_name + "_" + date + '\n\n')
+    logger.info("Made project: " + field_name + "_" + date + '\n\n')
 
-        try:
-            time = strftime("%H%M")
-            set = shutil.move(set, date + "_" + field_name + time)
-            shutil.move(set, processed_folder, copy_function = shutil.copytree)
-            log.info("Moved " + set + " to " + processed_folder + "\n\n")
-        except:
-            logger.error("Failed to move set to processed folder\n\n")
+    try:
+        time = strftime("%H%M")
+        tif_set = shutil.move(tif_set, date + "_" + field_name + time)
+        shutil.move(tif_set, processed_folder, copy_function = shutil.copytree)
+        logger.info("Moved " + tif_set + " to " + processed_folder + "\n\n")
+    except:
+        logger.error("Failed to move set to processed folder\n\n")
 
     logger.info("Script terminated at " + strftime("%Y-%m-%dT%H%M%S"))
 
